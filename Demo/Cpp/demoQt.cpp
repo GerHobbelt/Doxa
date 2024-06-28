@@ -10,19 +10,19 @@
 // nmake
 
 
-Doxa::Image ToDoxaImageReference(const QImage& gsImage)
+static Doxa::Image ToDoxaImageReference(const QImage& gsImage)
 {
 	assert(gsImage.format() == QImage::Format_Grayscale8);
 	return Doxa::Image::Reference(gsImage.width(), gsImage.height(), (Doxa::Pixel8*)gsImage.bits());
 }
 
-QImage FromDoxaImage(const Doxa::Image& binaryImage)
+static QImage FromDoxaImage(const Doxa::Image& binaryImage)
 {
 	// This QImage object does not contain a copy of the image memory, but a reference to it.
 	return QImage(binaryImage.data, binaryImage.width, binaryImage.height, binaryImage.width, QImage::Format_Grayscale8);
 }
 
-void DisplayPerformance(const Doxa::Image& groundTruthImage, const Doxa::Image& binaryImage)
+static void DisplayPerformance(const Doxa::Image& groundTruthImage, const Doxa::Image& binaryImage)
 {
 	Doxa::ClassifiedPerformance::Classifications classifications;
 	bool canCompare = Doxa::ClassifiedPerformance::CompareImages(classifications, groundTruthImage, binaryImage);

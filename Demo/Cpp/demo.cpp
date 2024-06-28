@@ -11,7 +11,7 @@
 //clang++ -Wall -std=c++17 -L /usr/local/Cellar/llvm/7.0.1/lib/ -lc++fs -O3 demo.cpp -o demo
 
 
-void DisplayPerformance(const Doxa::Image& groundTruthImage, const Doxa::Image& binaryImage)
+static void DisplayPerformance(const Doxa::Image& groundTruthImage, const Doxa::Image& binaryImage)
 {
 	Doxa::ClassifiedPerformance::Classifications classifications;
 	bool canCompare = Doxa::ClassifiedPerformance::CompareImages(classifications, groundTruthImage, binaryImage);
@@ -37,6 +37,11 @@ void DisplayPerformance(const Doxa::Image& groundTruthImage, const Doxa::Image& 
 		<< "DRDM:\t\t"		<< scoreDRDM << std::endl
 		<< std::endl;
 }
+
+
+#if defined(BUILD_MONOLITHIC)
+#define main    doxa_demo_main
+#endif
 
 int main()
 {

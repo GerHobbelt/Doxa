@@ -7,18 +7,18 @@
 //cl /EHsc /std:c++17 /O2 /I"%OPENCV_DIR%\include" "%OPENCV_DIR%\x64\vc15\lib\opencv_world451.lib"  demoOpenCV.cpp
 
 
-Doxa::Image ToDoxaImageReference(const cv::Mat& gsImage)
+static Doxa::Image ToDoxaImageReference(const cv::Mat& gsImage)
 {
 	assert(gsImage.channels() == 1);
 	return Doxa::Image::Reference(gsImage.cols, gsImage.rows, (Doxa::Pixel8*)gsImage.data);
 }
 
-cv::Mat FromDoxaImage(const Doxa::Image& binaryImage)
+static cv::Mat FromDoxaImage(const Doxa::Image& binaryImage)
 {
 	return cv::Mat(binaryImage.height, binaryImage.width, CV_8UC1, binaryImage.data);
 }
 
-void DisplayPerformance(const Doxa::Image& groundTruthImage, const Doxa::Image& binaryImage)
+static void DisplayPerformance(const Doxa::Image& groundTruthImage, const Doxa::Image& binaryImage)
 {
 	Doxa::ClassifiedPerformance::Classifications classifications;
 	bool canCompare = Doxa::ClassifiedPerformance::CompareImages(classifications, groundTruthImage, binaryImage);
@@ -44,6 +44,11 @@ void DisplayPerformance(const Doxa::Image& groundTruthImage, const Doxa::Image& 
 		<< "DRDM:\t\t"		<< scoreDRDM << std::endl
 		<< std::endl;
 }
+
+
+#if defined(BUILD_MONOLITHIC)
+#define main    doxa_OpenCV_demo_main
+#endif
 
 int main()
 {
