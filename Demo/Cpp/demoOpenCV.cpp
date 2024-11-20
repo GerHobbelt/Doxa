@@ -56,7 +56,7 @@ int main()
 	cv::Mat cvGsImage = cv::imread(R"(2JohnC1V3.png)", cv::IMREAD_GRAYSCALE);
 	
 	// Create a reference to the cv::Mat image.
-	// Not only is this effecient, but any changes made by our algorithm apply directly
+	// Not only is this efficient, but any changes made by our algorithm apply directly
 	// to the image being referenced.
 	Doxa::Image doxaGsImage = ToDoxaImageReference(cvGsImage);
 
