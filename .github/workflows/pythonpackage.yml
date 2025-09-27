@@ -1,88 +1,84 @@
-name: Python package
+name: Python Package
 
 on:
-#  push:
   release:
     types:
       - published
 
 jobs:
-  build-and-test:
-    strategy:
-      matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
-        python-version: [3.12]
-    runs-on: ${{ matrix.os }}
-
-    steps:
-    - uses: actions/checkout@v2
-      with:
-        submodules: true
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v2
-      with:
-        python-version: ${{ matrix.python-version }}
-    - name: Install dependencies
-      run: |
-        pip install -r requirements.txt
-    - name: Build and install
-      run: |
-        cd Bindings/Python
-        python copy-cpp-files.py
-        python setup.py develop
-      env:
-        # C++17 support started in MacOS 10.13, full support in 10.14+
-        MACOSX_DEPLOYMENT_TARGET: 10.14
-    - name: Run tests
-      run: |
-        cd Bindings/Python
-        python test/test_doxa.py
-    - name: Build wheels
-      run: |
-        cd Bindings/Python
-        python setup.py bdist_wheel
-      env:
-        # C++17 support started in MacOS 10.13, full support in 10.14+
-        MACOSX_DEPLOYMENT_TARGET: 10.14
-    - uses: actions/upload-artifact@v2
-      with:
-        path: Bindings/Python/dist/*.whl
-
-  build-sdist:
+  build_sdist:
+    name: Build SDist
     runs-on: ubuntu-latest
-
+    defaults:
+      run:
+        working-directory: ./Bindings/Python
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
       with:
         submodules: true
-    - name: Set up Python 3.12
-      uses: actions/setup-python@v2
-      with:
-        python-version: 3.12
-    - name: Install dependencies
+
+    - name: Build SDist
       run: |
-        python -m pip install -U pip setuptools
-    - name: Build sdist
-      run: |
-        cd Bindings/Python
         python copy-cpp-files.py
-        python setup.py sdist
-    - uses: actions/upload-artifact@v2
+        pipx run build --sdist
+
+    - name: Check metadata
+      run: pipx run twine check dist/*
+
+    - uses: actions/upload-artifact@v4
       with:
+        name: dist-sdist
         path: Bindings/Python/dist/*.tar.gz
 
-  upload-pypi:
-    if: github.event_name == 'release' && github.event.action == 'published'
-    needs: [build-and-test, build-sdist]
-    runs-on: ubuntu-latest
+
+  build_wheels:
+    name: Build Wheels
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        working-directory: ./Bindings/Python
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
 
     steps:
-      - uses: actions/download-artifact@v2
-        with:
-          name: artifact
-          path: dist
+    - uses: actions/setup-python@v5
+    - uses: actions/checkout@v4
+      with:
+        submodules: true
 
-      - uses: pypa/gh-action-pypi-publish@master
-        with:
-          user: __token__
-          password: ${{ secrets.pypi_password }}
+    - name: Build setup
+      run: |
+        python copy-cpp-files.py
+        pip install -r requirements.txt
+        python -m pip install cibuildwheel==2.22.0
+
+    - name: Build wheels
+      run: python -m cibuildwheel --output-dir wheelhouse
+
+    - name: Upload wheels
+      uses: actions/upload-artifact@v4
+      with:
+        path: Bindings/Python/wheelhouse/*.whl
+        name: dist-${{ matrix.os }}
+
+  upload_all:
+    name: Upload to PyPi
+    needs: [build_wheels, build_sdist]
+    runs-on: ubuntu-latest
+    if: github.event_name == 'release' && github.event.action == 'published'
+
+    steps:
+    - uses: actions/setup-python@v5
+    - uses: actions/download-artifact@v4
+      with:
+        path: dist
+        pattern: dist-*
+        merge-multiple: true
+
+    - uses: pypa/gh-action-pypi-publish@release/v1
+      with:
+        user: __token__
+        password: ${{ secrets.pypi_password }}

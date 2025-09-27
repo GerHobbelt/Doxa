@@ -1,5 +1,7 @@
 # Δoxa Binarization Framework
 
+[![codecov](https://codecov.io/gh/brandonmpetty/Doxa/graph/badge.svg?token=XMG2X9KQKJ)](https://codecov.io/gh/brandonmpetty/Doxa)
+
 <p align="center">
 	<img src="/README/2JohnC1V3.png" width="45%" height="45%"/>
 	<img src="/README/2JohnC1V3-GroundTruth.png" width="45%" height="45%"/>
