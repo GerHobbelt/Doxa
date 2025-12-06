@@ -1,3 +1,5 @@
+#if !defined(BUILD_MONOLITHIC)
+
 #include <QImage>
 #include <iostream>
 #include <cassert>
@@ -81,3 +83,5 @@ int main()
 	
 	return 0;
 }
+
+#endif
