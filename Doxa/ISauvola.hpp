@@ -125,8 +125,8 @@ namespace Doxa
 				// Build Coordinates and detect if we are on the far left or right
 				const int top = idx - binaryImageIn.width;
 				const int bottom = idx + binaryImageIn.width;
-				const bool checkLeft = idx % binaryImageIn.width;
-				const bool checkRight = (idx + 1) % binaryImageIn.width;;
+				const bool checkLeft = bool(idx % binaryImageIn.width);
+				const bool checkRight = bool((idx + 1) % binaryImageIn.width);
 
 				// Process Top Row
 				if (top > 0)
